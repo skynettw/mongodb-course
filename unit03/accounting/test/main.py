@@ -168,54 +168,10 @@ class AccountingApp:
         button_frame = tk.Frame(form_frame, bg="white")
         button_frame.grid(row=4, column=0, columnspan=2, pady=10)
 
-        tk.Button(button_frame, text="新增", command=self.add_transaction).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="新增並返回", command=self.add_and_return).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="新增", command=lambda: self.add_transaction("income")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="新增並返回", command=lambda: self.add_and_return("income")).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="清除", command=self.clear_form).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="直接返回", command=self.create_main_screen).pack(side=tk.LEFT, padx=5)
-
-    def add_transaction(self, return_to_main=False):
-        date = self.date_entry.get_date()
-        summary = self.summary_entry.get()
-        amount = self.amount_entry.get()
-        memo = self.memo_entry.get()
-
-        if not all([date, summary, amount]):
-            messagebox.showerror("錯誤", "請填寫所有必填欄位（日期、摘要、金額）")
-            return
-
-        try:
-            amount = float(amount)
-        except ValueError:
-            messagebox.showerror("錯誤", "金額必須是數字")
-            return
-
-        # 將 date 轉換為 datetime 對象
-        date_time = datetime.combine(date, datetime.min.time())
-
-        transaction = {
-            "user": self.current_user,
-            "date": date_time,  # 使用轉換後的 datetime 對象
-            "amount": amount,
-            "category": "income",
-            "memo": memo
-        }
-
-        self.db.transaction.insert_one(transaction)
-        messagebox.showinfo("成功", "收入已新增")
-
-        if return_to_main:
-            self.create_main_screen()
-        else:
-            self.clear_form()
-
-    def add_and_return(self):
-        self.add_transaction(return_to_main=True)
-
-    def clear_form(self):
-        self.date_entry.set_date(datetime.now())
-        self.summary_entry.delete(0, tk.END)
-        self.amount_entry.delete(0, tk.END)
-        self.memo_entry.delete(0, tk.END)
 
     def add_expense(self):
         self.create_expense_form()
@@ -280,7 +236,8 @@ class AccountingApp:
             "date": date_time,  # 使用轉換後的 datetime 對象
             "amount": amount,
             "category": category,
-            "memo": memo
+            "memo": memo,
+            "summary": summary  # 添加摘要字段
         }
 
         self.db.transaction.insert_one(transaction)
@@ -293,6 +250,12 @@ class AccountingApp:
 
     def add_and_return(self, category):
         self.add_transaction(category, return_to_main=True)
+
+    def clear_form(self):
+        self.date_entry.set_date(datetime.now())
+        self.summary_entry.delete(0, tk.END)
+        self.amount_entry.delete(0, tk.END)
+        self.memo_entry.delete(0, tk.END)
 
     def view_transactions(self):
         self.create_view_transactions_screen()
@@ -406,7 +369,7 @@ class AccountingApp:
 
             date_str = transaction["date"].strftime("%Y-%m-%d")
             amount_str = f"{amount:,.2f}"
-            summary = transaction["memo"]
+            summary = transaction.get("summary", transaction.get("memo", ""))  # 使用 summary 或 memo
 
             # 設置顏色
             tag = "income" if amount >= 0 else "expense"
@@ -435,8 +398,8 @@ class AccountingApp:
                 
                 query = {
                     "user": self.current_user,
-                    "date": date,
-                    "memo": summary,
+                    "date": {"$gte": date, "$lt": date + timedelta(days=1)},
+                    "summary": summary,
                     "amount": abs(amount)
                 }
                 self.db.transaction.delete_one(query)
@@ -478,9 +441,9 @@ class AccountingApp:
         info_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # 左側區塊
-        left_frame = tk.Frame(info_frame, width=200)  # 設置固定寬度
+        left_frame = tk.Frame(info_frame, width=200)
         left_frame.pack(side=tk.LEFT, fill=tk.Y, expand=False)
-        left_frame.pack_propagate(False)  # 防止 frame 自動調整大小
+        left_frame.pack_propagate(False)
 
         # 右側區塊
         right_frame = tk.Frame(info_frame)
@@ -495,12 +458,13 @@ class AccountingApp:
         self.balance_list.column("月份", width=70)
         self.balance_list.column("結餘", width=130)
 
-        if self.fig:
-            plt.close(self.fig)
-
-        self.fig, self.ax = plt.subplots(figsize=(6, 4))  # 增加圖表寬度
+        # 調整圖表大小和位置
+        self.fig, self.ax = plt.subplots(figsize=(8, 6))  # 增加圖表大小
         self.canvas = FigureCanvasTkAgg(self.fig, master=right_frame)
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=(20, 20), pady=(10, 10))  # 添加邊距
+
+        # 調整Y軸標籤的位置
+        plt.subplots_adjust(left=0.15, right=0.95, top=0.9, bottom=0.1)  # 調整圖表邊距
 
         self.update_user_info()
 
@@ -530,6 +494,10 @@ class AccountingApp:
         # 設置 x 軸刻度標籤
         self.ax.set_xticks(months)
         self.ax.set_xticklabels([f"{m}月" for m in months], fontproperties=self.chinese_font)
+
+        # 設置中文字體
+        plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+        plt.rcParams['axes.unicode_minus'] = False
 
         self.canvas.draw()
 
