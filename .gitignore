@@ -1,2 +1,6 @@
 *.pyc
 mdb/
+unit04/wp/init.sql/
+unit04/wp/mariadb/
+unit04/wp/wp8081/
+unit04/wp/wp8082/
