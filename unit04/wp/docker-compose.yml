@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  wordpress1:
+    image: wordpress:latest
+    container_name: wordpress1
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress1
+      WORDPRESS_DB_PASSWORD: wordpress1password
+      WORDPRESS_DB_NAME: wordpress1
+    volumes:
+      - ./wp8081:/var/www/html
+    depends_on:
+      - db
+
+  wordpress2:
+    image: wordpress:latest
+    container_name: wordpress2
+    ports:
+      - "8082:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress2
+      WORDPRESS_DB_PASSWORD: wordpress2password
+      WORDPRESS_DB_NAME: wordpress2
+    volumes:
+      - ./wp8082:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: wordpress1
+      MARIADB_USER: wordpress1
+      MARIADB_PASSWORD: wordpress1password
+    volumes:
+      - ./mariadb:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mariadb
+      MYSQL_ROOT_PASSWORD: rootpassword
+    depends_on:
+      - db
+
+volumes:
+  wp8081:
+  wp8082:
+  mariadb:
