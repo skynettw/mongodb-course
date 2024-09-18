@@ -15,7 +15,7 @@ class AccountingApp:
     def __init__(self, master):
         self.master = master
         self.master.title("個人記帳程式")
-        self.master.geometry("800x500")
+        self.master.geometry("1000x800")
         self.master.configure(bg="white")
 
         self.conn = "mongodb://admin:mymdb$1234@localhost:27017"
@@ -67,8 +67,34 @@ class AccountingApp:
         self.password_entry = tk.Entry(login_frame, show="*")
         self.password_entry.grid(row=1, column=1, padx=5, pady=5)
 
+        tk.Label(login_frame, text="確認密碼：", bg="white").grid(row=2, column=0, padx=5, pady=5)
+        self.confirm_password_entry = tk.Entry(login_frame, show="*")
+        self.confirm_password_entry.grid(row=2, column=1, padx=5, pady=5)
+
         login_button = tk.Button(login_frame, text="登入", command=self.login)
-        login_button.grid(row=2, column=0, columnspan=2, pady=10)
+        login_button.grid(row=3, column=0, columnspan=2, pady=10)
+        register_button = tk.Button(login_frame, text="註冊", command=self.register)
+        register_button.grid(row=3, column=1, columnspan=2, pady=10)
+
+    def register(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        confirm_password = self.confirm_password_entry.get()
+
+        if not all([username, password, confirm_password]):
+            messagebox.showerror("錯誤", "請填寫所有必填欄位（使用者名稱、密碼、確認密碼）")
+            return
+        if password != confirm_password:
+            messagebox.showerror("錯誤", "密碼與確認密碼不一致")
+            return
+
+        user = self.db.user.find_one({"username": username})
+        if user:
+            messagebox.showerror("錯誤", "使用者名稱已存在")
+            return
+        self.db.user.insert_one({"username": username, "password": password})
+        messagebox.showinfo("成功", "註冊成功")
+
 
     def login(self):
         username = self.username_entry.get()
@@ -87,8 +113,10 @@ class AccountingApp:
 
         title_frame = tk.Frame(self.master, bg="blue", height=50)
         title_frame.pack(fill=tk.X)
-        title_label = tk.Label(title_frame, text="個人記帳程式", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
-        title_label.pack(expand=True)
+        title_label = tk.Label(title_frame, text=f"個人記帳程式 - {self.current_user}", font=("微軟正黑體", 12), bg="blue", fg="white")
+        title_label.pack(side=tk.LEFT, padx=10)
+        center_title = tk.Label(title_frame, text="主畫面", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
+        center_title.pack(expand=True)
 
         button_frame = tk.Frame(self.master, bg="white")
         button_frame.pack(expand=True)
@@ -116,8 +144,10 @@ class AccountingApp:
 
         title_frame = tk.Frame(self.master, bg="blue", height=50)
         title_frame.pack(fill=tk.X)
-        title_label = tk.Label(title_frame, text="新增收入", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
-        title_label.pack(expand=True)
+        title_label = tk.Label(title_frame, text=f"個人記帳程式 - {self.current_user}", font=("微軟正黑體", 12), bg="blue", fg="white")
+        title_label.pack(side=tk.LEFT, padx=10)
+        center_title = tk.Label(title_frame, text="新增收入", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
+        center_title.pack(expand=True)
 
         form_frame = tk.Frame(self.master, bg="white")
         form_frame.pack(expand=True, padx=20, pady=20)
@@ -141,91 +171,8 @@ class AccountingApp:
         button_frame = tk.Frame(form_frame, bg="white")
         button_frame.grid(row=4, column=0, columnspan=2, pady=10)
 
-        tk.Button(button_frame, text="新增", command=self.add_transaction).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="新增並返回", command=self.add_and_return).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="清除", command=self.clear_form).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="直接返回", command=self.create_main_screen).pack(side=tk.LEFT, padx=5)
-
-    def add_transaction(self, return_to_main=False):
-        date = self.date_entry.get_date()
-        summary = self.summary_entry.get()
-        amount = self.amount_entry.get()
-        memo = self.memo_entry.get()
-
-        if not all([date, summary, amount]):
-            messagebox.showerror("錯誤", "請填寫所有必填欄位（日期、摘要、金額）")
-            return
-
-        try:
-            amount = float(amount)
-        except ValueError:
-            messagebox.showerror("錯誤", "金額必須是數字")
-            return
-
-        # 將 date 轉換為 datetime 對象
-        date_time = datetime.combine(date, datetime.min.time())
-
-        transaction = {
-            "user": self.current_user,
-            "date": date_time,  # 使用轉換後的 datetime 對象
-            "amount": amount,
-            "category": "income",
-            "memo": memo
-        }
-
-        self.db.transaction.insert_one(transaction)
-        messagebox.showinfo("成功", "收入已新增")
-
-        if return_to_main:
-            self.create_main_screen()
-        else:
-            self.clear_form()
-
-    def add_and_return(self):
-        self.add_transaction(return_to_main=True)
-
-    def clear_form(self):
-        self.date_entry.set_date(datetime.now())
-        self.summary_entry.delete(0, tk.END)
-        self.amount_entry.delete(0, tk.END)
-        self.memo_entry.delete(0, tk.END)
-
-    def add_expense(self):
-        self.create_expense_form()
-
-    def create_expense_form(self):
-        for widget in self.master.winfo_children():
-            widget.destroy()
-
-        title_frame = tk.Frame(self.master, bg="blue", height=50)
-        title_frame.pack(fill=tk.X)
-        title_label = tk.Label(title_frame, text="新增支出", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
-        title_label.pack(expand=True)
-
-        form_frame = tk.Frame(self.master, bg="white")
-        form_frame.pack(expand=True, padx=20, pady=20)
-
-        tk.Label(form_frame, text="日期：", bg="white").grid(row=0, column=0, sticky="e", padx=5, pady=5)
-        self.date_entry = DateEntry(form_frame, width=12, background='darkblue', foreground='white', borderwidth=2)
-        self.date_entry.grid(row=0, column=1, padx=5, pady=5)
-
-        tk.Label(form_frame, text="摘要：", bg="white").grid(row=1, column=0, sticky="e", padx=5, pady=5)
-        self.summary_entry = tk.Entry(form_frame)
-        self.summary_entry.grid(row=1, column=1, padx=5, pady=5)
-
-        tk.Label(form_frame, text="金額：", bg="white").grid(row=2, column=0, sticky="e", padx=5, pady=5)
-        self.amount_entry = tk.Entry(form_frame)
-        self.amount_entry.grid(row=2, column=1, padx=5, pady=5)
-
-        tk.Label(form_frame, text="備註：", bg="white").grid(row=3, column=0, sticky="e", padx=5, pady=5)
-        self.memo_entry = tk.Entry(form_frame)
-        self.memo_entry.grid(row=3, column=1, padx=5, pady=5)
-
-        button_frame = tk.Frame(form_frame, bg="white")
-        button_frame.grid(row=4, column=0, columnspan=2, pady=10)
-
-        tk.Button(button_frame, text="新增", command=lambda: self.add_transaction("expense")).pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="新增並返回", command=lambda: self.add_and_return("expense")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="新增", command=lambda: self.add_transaction("income")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="新增並返回", command=lambda: self.add_and_return("income")).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="清除", command=self.clear_form).pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="直接返回", command=self.create_main_screen).pack(side=tk.LEFT, padx=5)
 
@@ -250,7 +197,7 @@ class AccountingApp:
 
         transaction = {
             "user": self.current_user,
-            "date": date_time,  # 使用轉換後的 datetime 對象
+            "date": date_time,
             "amount": amount,
             "category": category,
             "memo": memo
@@ -267,6 +214,57 @@ class AccountingApp:
     def add_and_return(self, category):
         self.add_transaction(category, return_to_main=True)
 
+    def clear_form(self):
+        self.date_entry.set_date(datetime.now())
+        self.summary_entry.delete(0, tk.END)
+        self.amount_entry.delete(0, tk.END)
+        self.memo_entry.delete(0, tk.END)
+
+    def add_expense(self):
+        self.create_expense_form()
+
+    def create_expense_form(self):
+        for widget in self.master.winfo_children():
+            widget.destroy()
+
+        title_frame = tk.Frame(self.master, bg="blue", height=50)
+        title_frame.pack(fill=tk.X)
+        title_label = tk.Label(title_frame, text=f"個人記帳程式 - {self.current_user}", font=("微軟正黑體", 12), bg="blue", fg="white")
+        title_label.pack(side=tk.LEFT, padx=10)
+        center_title = tk.Label(title_frame, text="新增支出", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
+        center_title.pack(expand=True)
+
+        form_frame = tk.Frame(self.master, bg="white")
+        form_frame.pack(expand=True, padx=20, pady=20)
+
+        tk.Label(form_frame, text="日期：", bg="white").grid(row=0, column=0, sticky="e", padx=5, pady=5)
+        self.date_entry = DateEntry(form_frame, width=12, background='darkblue', foreground='white', borderwidth=2)
+        self.date_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="摘要：", bg="white").grid(row=1, column=0, sticky="e", padx=5, pady=5)
+        self.summary_entry = tk.Entry(form_frame)
+        self.summary_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="金額：", bg="white").grid(row=2, column=0, sticky="e", padx=5, pady=5)
+        self.amount_entry = tk.Entry(form_frame)
+        self.amount_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="備註：", bg="white").grid(row=3, column=0, sticky="e", padx=5, pady=5)
+        self.memo_entry = tk.Entry(form_frame)
+        self.memo_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        tk.Label(form_frame, text="類別：", bg="white").grid(row=4, column=0, sticky="e", padx=5, pady=5)
+        self.category_entry = tk.Entry(form_frame)
+        self.category_entry.grid(row=4, column=1, padx=5, pady=5)
+
+        button_frame = tk.Frame(form_frame, bg="white")
+        button_frame.grid(row=5, column=0, columnspan=2, pady=10)
+
+        tk.Button(button_frame, text="新增", command=lambda: self.add_transaction("expense")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="新增並返回", command=lambda: self.add_and_return("expense")).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="清除", command=self.clear_form).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="直接返回", command=self.create_main_screen).pack(side=tk.LEFT, padx=5)
+
     def view_transactions(self):
         self.create_view_transactions_screen()
 
@@ -276,8 +274,10 @@ class AccountingApp:
 
         title_frame = tk.Frame(self.master, bg="blue", height=50)
         title_frame.pack(fill=tk.X)
-        title_label = tk.Label(title_frame, text="瀏覽收支", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
-        title_label.pack(expand=True)
+        title_label = tk.Label(title_frame, text=f"個人記帳程式 - {self.current_user}", font=("微軟正黑體", 12), bg="blue", fg="white")
+        title_label.pack(side=tk.LEFT, padx=10)
+        center_title = tk.Label(title_frame, text="瀏覽收支", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
+        center_title.pack(expand=True)
 
         filter_frame = tk.Frame(self.master, bg="white")
         filter_frame.pack(fill=tk.X, padx=20, pady=10)
@@ -379,7 +379,7 @@ class AccountingApp:
 
             date_str = transaction["date"].strftime("%Y-%m-%d")
             amount_str = f"{amount:,.2f}"
-            summary = transaction["memo"]
+            summary = transaction.get("summary", "無摘要")  # 使用 'summary' 欄位，如果不存在則顯示 "無摘要"
 
             # 設置顏色
             tag = "income" if amount >= 0 else "expense"
@@ -396,8 +396,12 @@ class AccountingApp:
         self.balance_label.config(text=f"結餘總計: {total_amount:,.2f}", fg=total_color)
 
     def on_transaction_click(self, event):
-        # 獲取點擊的項目
-        item = self.transaction_list.selection()[0]
+        # 獲取選擇的項目
+        selected_items = self.transaction_list.selection()
+        if not selected_items:  # 如果沒有選擇任何項目，直接返回
+            return
+        
+        item = selected_items[0]
         values = self.transaction_list.item(item, "values")
         if values:
             if messagebox.askyesno("刪除確認", f"是否要刪除此記錄？\n{' | '.join(values)}"):
@@ -409,7 +413,7 @@ class AccountingApp:
                 query = {
                     "user": self.current_user,
                     "date": date,
-                    "memo": summary,
+                    "summary": summary,  # 使用 'summary' 而不是 'memo'
                     "amount": abs(amount)
                 }
                 self.db.transaction.delete_one(query)
@@ -424,19 +428,16 @@ class AccountingApp:
         for widget in self.master.winfo_children():
             widget.destroy()
 
+        title_frame = tk.Frame(self.master, bg="blue", height=50)
+        title_frame.pack(fill=tk.X)
+        title_label = tk.Label(title_frame, text=f"個人記帳程式 - {self.current_user}", font=("微軟正黑體", 12), bg="blue", fg="white")
+        title_label.pack(side=tk.LEFT, padx=10)
+        center_title = tk.Label(title_frame, text="用戶資訊", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
+        center_title.pack(expand=True)
+
         # 顯示用戶名稱
         username_label = tk.Label(self.master, text=self.current_user, font=("微軟正黑體", 24, "bold"), bg="white")
         username_label.pack(pady=10)
-
-        # 標題
-        title_frame = tk.Frame(self.master, bg="blue", height=50)
-        title_frame.pack(fill=tk.X)
-        title_label = tk.Label(title_frame, text="用戶資訊", font=("微軟正黑體", 20, "bold"), bg="blue", fg="white")
-        title_label.pack(expand=True)
-
-        # 返回主畫面按鈕
-        return_button = tk.Button(self.master, text="返回主畫面", command=self.create_main_screen, font=("微軟正黑體", 12))
-        return_button.pack(pady=10)
 
         # 年份選擇
         current_year = datetime.now().year
@@ -451,9 +452,9 @@ class AccountingApp:
         info_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # 左側區塊
-        left_frame = tk.Frame(info_frame, width=200)  # 設置固定寬度
+        left_frame = tk.Frame(info_frame, width=200)
         left_frame.pack(side=tk.LEFT, fill=tk.Y, expand=False)
-        left_frame.pack_propagate(False)  # 防止 frame 自動調整大小
+        left_frame.pack_propagate(False)
 
         # 右側區塊
         right_frame = tk.Frame(info_frame)
@@ -471,11 +472,20 @@ class AccountingApp:
         if self.fig:
             plt.close(self.fig)
 
-        self.fig, self.ax = plt.subplots(figsize=(6, 4))  # 增加圖表寬度
+        # 調整圖表大小
+        self.fig, self.ax = plt.subplots(figsize=(7, 4))
         self.canvas = FigureCanvasTkAgg(self.fig, master=right_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         self.update_user_info()
+
+        # 創建一個新的框架來容納返回按鈕
+        button_frame = tk.Frame(self.master, bg="white")
+        button_frame.pack(fill=tk.X, pady=10)
+
+        # 返回主畫面按鈕
+        return_button = tk.Button(button_frame, text="返回主畫面", command=self.create_main_screen, font=("微軟正黑體", 12))
+        return_button.pack()
 
     def update_user_info(self, event=None):
         selected_year = int(self.year_var.get())
@@ -502,7 +512,13 @@ class AccountingApp:
 
         # 設置 x 軸刻度標籤
         self.ax.set_xticks(months)
-        self.ax.set_xticklabels([f"{m}月" for m in months], fontproperties=self.chinese_font)
+        self.ax.set_xticklabels([f"{m}月" for m in months], fontproperties=self.chinese_font, rotation=45, ha='right')
+
+        # 自動調整子圖佈局
+        plt.tight_layout()
+
+        # 確保 y 軸標籤不被切掉
+        self.fig.subplots_adjust(left=0.15)
 
         self.canvas.draw()
 
