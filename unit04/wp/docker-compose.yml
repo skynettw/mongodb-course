@@ -8,13 +8,15 @@ services:
       - "8081:80"
     environment:
       WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress1
-      WORDPRESS_DB_PASSWORD: wordpress1password
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress1
     volumes:
       - ./wp8081:/var/www/html
     depends_on:
       - db
+    networks:
+      - wordpress_network
 
   wordpress2:
     image: wordpress:latest
@@ -23,22 +25,23 @@ services:
       - "8082:80"
     environment:
       WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress2
-      WORDPRESS_DB_PASSWORD: wordpress2password
+      WORDPRESS_DB_USER: wordpress_user
+      WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress2
     volumes:
       - ./wp8082:/var/www/html
     depends_on:
       - db
+    networks:
+      - wordpress_network
 
   db:
     image: mariadb:latest
     container_name: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: rootpassword
-      MARIADB_DATABASE: wordpress1
-      MARIADB_USER: wordpress1
-      MARIADB_PASSWORD: wordpress1password
+      MARIADB_USER: wordpress_user
+      MARIADB_PASSWORD: wordpress_password
     volumes:
       - ./mariadb:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -49,6 +52,8 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+    networks:
+      - wordpress_network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -60,6 +65,12 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
     depends_on:
       - db
+    networks:
+      - wordpress_network
+
+networks:
+  wordpress_network:
+    driver: bridge
 
 volumes:
   wp8081:

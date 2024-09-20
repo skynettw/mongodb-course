@@ -1,0 +1,5 @@
+CREATE DATABASE IF NOT EXISTS wordpress1;
+CREATE DATABASE IF NOT EXISTS wordpress2;
+GRANT ALL PRIVILEGES ON wordpress1.* TO 'wordpress_user'@'%';
+GRANT ALL PRIVILEGES ON wordpress2.* TO 'wordpress_user'@'%';
+FLUSH PRIVILEGES;
