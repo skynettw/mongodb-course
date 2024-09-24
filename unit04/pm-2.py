@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from woocommerce import API
-
 # 設定 WooCommerce API 連接
 wcapi1 = API(
     url="http://localhost:8081",  # 本地 WooCommerce 網站 URL
