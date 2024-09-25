@@ -52,7 +52,7 @@ product_list = []
 product_category = []
 
 def load_website():
-    global db, wcapi, product_list, product_category
+    global db, wcapi, wcapi1, wcapi2, product_list, product_category
     selected_website = website_label.get()
     if selected_website == "WP1":
         wcapi = wcapi1
