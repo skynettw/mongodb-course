@@ -273,7 +273,7 @@ update_button = tk.Button(button_frame, text="更新", width=8)
 update_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 def import_products():
-    global db, tree, product_list
+    global db
     file_path = filedialog.askopenfilename(
         title="選擇商品資料檔案",
         filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
