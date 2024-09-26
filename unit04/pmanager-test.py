@@ -77,7 +77,7 @@ def load_website():
     
     for i, product in enumerate(product_list):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
     
     # 更新類別下拉式選單的值
     category_values = ["所有類別"] + [category['name'] for category in product_category]
@@ -107,7 +107,7 @@ def load_database():
     
     for i, product in enumerate(product_list):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
     
     # 更新類別下拉式選單的值
     category_values = ["所有類別"] + [category['name'] for category in product_category]
@@ -150,7 +150,7 @@ def filter_products():
     
     for i, product in enumerate(filtered_products):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
 
 def search_products():
     global db
@@ -167,7 +167,7 @@ def search_products():
     
     for i, product in enumerate(filtered_products):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
 
 filter_button = tk.Button(category_frame, text="篩選", width=5, command=filter_products)
 filter_button.pack(side=tk.RIGHT, padx=5)
@@ -186,16 +186,18 @@ search_button = tk.Button(search_frame, text="搜尋", width=5, command=search_p
 search_button.pack(side=tk.RIGHT, padx=5)
 
 # Create the table for product data
-columns = ("品名", "售價", "庫存")
+columns = ("貨號", "品名", "售價", "庫存")
 
 tree = ttk.Treeview(root, columns=columns, show="headings", height=5)
+tree.heading("貨號", text="貨號")
 tree.heading("品名", text="品名")
 tree.heading("售價", text="售價")
 tree.heading("庫存", text="庫存")
 
+tree.column("貨號", width=30)
 tree.column("品名", width=100)
-tree.column("售價", width=50)
-tree.column("庫存", width=50)
+tree.column("售價", width=40)
+tree.column("庫存", width=20)
 
 # Add alternating row colors
 tree.tag_configure('odd', background='#F8E0E0')  # Light pink
@@ -222,12 +224,12 @@ def discount_products():
             discount = float(discount)
             discount_products = []
             for product in tree.get_children():
-                price = tree.item(product, "values")[1][1:] # 去掉$符號
+                price = tree.item(product, "values")[2][1:] # 去掉$符號
                 if 0 < discount < 1: # 折扣百分比
                     discount_price = int(float(price) * discount)
                 else: # 折扣金額
                     discount_price = int(float(price) - discount)
-                discount_products.append({"name": tree.item(product, "values")[0], "price": discount_price})
+                discount_products.append({"sku":tree.item(product, "values")[0], "name": tree.item(product, "values")[1], "price": discount_price, "stock_quantity": tree.item(product, "values")[3]})
                 # 從樹狀視圖中移除折扣商品
                 tree.delete(product)
             
@@ -286,8 +288,8 @@ def import_products():
                 tree.delete(product)
             for index, row in enumerate(reader):
                 tags = 'even' if index % 2 == 0 else 'odd'
-                tree.insert("", "end", values=(row["Name"], f"${row["Sale price"]}", row["Stock"]), tags=(tags,))
-                uploaded_products.append({"name": row["Name"], "price": row["Sale price"], "stock_quantity": row["Stock"]})
+                tree.insert("", "end", values=(row["SKU"], row["Name"], f"${row["Sale price"]}", row["Stock"]), tags=(tags,))
+                uploaded_products.append({"sku": row["SKU"], "name": row["Name"], "price": row["Sale price"], "stock_quantity": row["Stock"]})
     db.product.insert_many(uploaded_products)
 
 import_button = tk.Button(button_frame, text="匯入", width=8, command=import_products)
