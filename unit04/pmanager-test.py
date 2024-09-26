@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from woocommerce import API
 from pymongo import MongoClient
 
@@ -207,10 +207,66 @@ tree.pack(pady=10, fill=tk.X, expand=True)
 button_frame = tk.Frame(root)
 button_frame.pack(pady=5, fill=tk.X)
 
-discount_button = tk.Button(button_frame, text="折扣", width=8)
+def discount_products():
+    global db, tk
+    popup = tk.Toplevel(root)
+    popup.title("折扣設定")
+    popup.geometry("300x200")
+    
+    discount_label = tk.Label(popup, text="折扣百分比")
+    discount_label.pack(pady=10)
+
+    def apply_discount(discount):
+        global db
+        try:
+            discount = float(discount)
+            discount_products = []
+            for product in tree.get_children():
+                price = tree.item(product, "values")[1][1:] # 去掉$符號
+                if 0 < discount < 1: # 折扣百分比
+                    discount_price = int(float(price) * discount)
+                else: # 折扣金額
+                    discount_price = int(float(price) - discount)
+                discount_products.append({"name": tree.item(product, "values")[0], "price": discount_price})
+                # 從樹狀視圖中移除折扣商品
+                tree.delete(product)
+            
+            # 更新樹狀視圖以顯示折扣後的商品
+            for index, product in enumerate(discount_products):
+                values = (product['name'], f"${product['price']}", "")
+                tag = 'odd' if index % 2 else 'even'
+                tree.insert('', 'end', values=values, tags=(tag,))
+            # 更新資料庫中的折扣商品
+            for product in discount_products:
+                db.product.update_one(
+                    {"name": product['name']},
+                    {"$set": {"price": product['price']}}
+                )
+            popup.destroy()
+            messagebox.showinfo("成功", "已成功應用折扣")
+
+        except ValueError:
+            popup.destroy()
+            messagebox.showerror("錯誤", "計算過程中發生錯誤")
+    
+    discount_entry = tk.Entry(popup, width=10)
+    discount_entry.pack(pady=10)
+    submit_button = tk.Button(popup, text="確認", command=lambda: apply_discount(discount_entry.get()))
+    submit_button.pack(pady=10)
+    
+discount_button = tk.Button(button_frame, text="折扣", width=8, command=discount_products)
 discount_button.pack(side=tk.LEFT, padx=10, expand=True, fill=tk.X)
 
-delete_button = tk.Button(button_frame, text="刪除", width=8)
+def remove_products():
+    global db, tree
+    selected_products = tree.selection()
+    if not selected_products:
+        messagebox.showerror("錯誤", "請選擇要移除的商品")
+        return
+    for product in selected_products:
+        tree.delete(product)
+    
+delete_button = tk.Button(button_frame, text="刪除", width=8, command=remove_products)
 delete_button.pack(side=tk.LEFT, padx=10, expand=True, fill=tk.X)
 
 update_button = tk.Button(button_frame, text="更新", width=8)
