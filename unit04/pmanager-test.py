@@ -271,7 +271,22 @@ def remove_products():
 delete_button = tk.Button(button_frame, text="刪除", width=8, command=remove_products)
 delete_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
-update_button = tk.Button(button_frame, text="更新", width=8)
+def update_products():
+    global db, wcapi
+    for product in db.product.find():
+        res = wcapi.get("products", params={"sku": product["sku"]})
+        if res.status_code == 200:
+            data = res.json()
+            if data:
+                if data["price"] != product["price"]:
+                    wcapi.put("products", {"id": data["id"]}, {"price": product["price"]})
+            else:
+                wcapi.post("products", {"sku": product["sku"], "name": product["name"], "price": product["price"], "stock_quantity": product["stock_quantity"]})
+        else:
+            print(f"更新失敗: {res.status_code} - {res.text}")
+
+        
+update_button = tk.Button(button_frame, text="更新", width=8, command=update_products)
 update_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 def import_products():
