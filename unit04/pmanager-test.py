@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from woocommerce import API
 from pymongo import MongoClient
-
+import csv
 conn = "mongodb://admin:mymdb$1234@localhost:27017/"
 client = MongoClient(conn)
 db_wp1 = client.wp1
@@ -255,7 +255,7 @@ def discount_products():
     submit_button.pack(pady=10)
     
 discount_button = tk.Button(button_frame, text="折扣", width=8, command=discount_products)
-discount_button.pack(side=tk.LEFT, padx=10, expand=True, fill=tk.X)
+discount_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 def remove_products():
     global db, tree
@@ -267,10 +267,28 @@ def remove_products():
         tree.delete(product)
     
 delete_button = tk.Button(button_frame, text="刪除", width=8, command=remove_products)
-delete_button.pack(side=tk.LEFT, padx=10, expand=True, fill=tk.X)
+delete_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 update_button = tk.Button(button_frame, text="更新", width=8)
-update_button.pack(side=tk.LEFT, padx=10, expand=True, fill=tk.X)
+update_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
+
+def import_products():
+    global db, tree
+    file_path = filedialog.askopenfilename(
+        title="選擇商品資料檔案",
+        filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+    )
+    if file_path:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            for product in tree.get_children():
+                tree.delete(product)
+            for index, row in enumerate(reader):
+                #db.product.insert_one(row)
+                tags = 'even' if index % 2 == 0 else 'odd'
+                tree.insert("", "end", values=(row["Name"], f"${row["Sale price"]}", row["Stock"]), tags=(tags,))
+import_button = tk.Button(button_frame, text="匯入", width=8, command=import_products)
+import_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 # Start the main event loop
 root.mainloop()
