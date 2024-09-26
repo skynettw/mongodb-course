@@ -273,20 +273,23 @@ update_button = tk.Button(button_frame, text="更新", width=8)
 update_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
 def import_products():
-    global db, tree
+    global db, tree, product_list
     file_path = filedialog.askopenfilename(
         title="選擇商品資料檔案",
         filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
     )
+    uploaded_products = []
     if file_path:
         with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for product in tree.get_children():
                 tree.delete(product)
             for index, row in enumerate(reader):
-                #db.product.insert_one(row)
                 tags = 'even' if index % 2 == 0 else 'odd'
                 tree.insert("", "end", values=(row["Name"], f"${row["Sale price"]}", row["Stock"]), tags=(tags,))
+                uploaded_products.append({"name": row["Name"], "price": row["Sale price"], "stock_quantity": row["Stock"]})
+    db.product.insert_many(uploaded_products)
+
 import_button = tk.Button(button_frame, text="匯入", width=8, command=import_products)
 import_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
