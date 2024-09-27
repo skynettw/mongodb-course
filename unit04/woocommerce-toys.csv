@@ -1,0 +1,11 @@
+ID,Type,SKU,Name,Published,Is featured?,Visibility in catalog,Short description,Description,Regular price,Sale price,Stock
+1,simple,TOY001,積木,1,1,visible,啟發創意的彩色積木,一套50塊耐用塑膠積木，啟發孩子的創造力,20.00,15.00,100
+2,simple,TOY002,絨毛熊,1,0,visible,可愛的絨毛熊玩偶,柔軟可愛的絨毛熊，適合各年齡層的小朋友,25.00,,50
+3,simple,TOY003,遙控車,1,1,visible,高速遙控車,一台速度快、敏捷的遙控車，具有20米的操控範圍,35.00,30.00,30
+4,simple,TOY004,拼圖遊戲,1,0,visible,益智拼圖遊戲,100片益智拼圖，促進解決問題的能力,15.00,12.00,75
+5,simple,TOY005,動作人偶,1,0,visible,可擺動的動作人偶,一個可動的動作人偶，並配有精緻的服裝,18.00,16.00,40
+6,simple,TOY006,木製火車組,1,1,visible,經典木製火車組,一套30件的木製火車組，鼓勵孩子創意遊戲,45.00,40.00,20
+7,simple,TOY007,娃娃屋,1,0,visible,帶家具的迷你娃娃屋,一個三層樓的娃娃屋，包含迷你家具,60.00,55.00,15
+8,simple,TOY008,樂高兼容人偶,1,1,visible,10個裝樂高兼容人偶,一套10個與樂高兼容的迷你人偶,12.00,10.00,200
+9,simple,TOY009,水槍,1,0,visible,大型水槍,一把適合夏季玩水的大型水槍,8.00,7.00,150
+10,simple,TOY010,溜溜球,1,0,visible,經典溜溜球玩具,一個傳統溜溜球，擁有順暢的旋轉機制,5.00,,300

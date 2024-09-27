@@ -77,7 +77,7 @@ def load_website():
     
     for i, product in enumerate(product_list):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['sale_price']}", product['stock_quantity']), tags=(tags,))
     
     # 更新類別下拉式選單的值
     category_values = ["所有類別"] + [category['name'] for category in product_category]
@@ -107,7 +107,7 @@ def load_database():
     
     for i, product in enumerate(product_list):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['sale_price']}", product['stock_quantity']), tags=(tags,))
     
     # 更新類別下拉式選單的值
     category_values = ["所有類別"] + [category['name'] for category in product_category]
@@ -150,7 +150,7 @@ def filter_products():
     
     for i, product in enumerate(filtered_products):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['sale_price']}", product['stock_quantity']), tags=(tags,))
 
 def search_products():
     global db
@@ -167,7 +167,7 @@ def search_products():
     
     for i, product in enumerate(filtered_products):
         tags = 'even' if i % 2 == 0 else 'odd'
-        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['price']}", product['stock_quantity']), tags=(tags,))
+        tree.insert("", "end", values=(product['sku'], product['name'], f"${product['sale_price']}", product['stock_quantity']), tags=(tags,))
 
 filter_button = tk.Button(category_frame, text="篩選", width=5, command=filter_products)
 filter_button.pack(side=tk.RIGHT, padx=5)
@@ -224,25 +224,25 @@ def discount_products():
             discount = float(discount)
             discount_products = []
             for product in tree.get_children():
-                price = tree.item(product, "values")[2][1:] # 去掉$符號
+                sale_price = tree.item(product, "values")[2][1:] # 去掉$符號
                 if 0 < discount < 1: # 折扣百分比
-                    discount_price = int(float(price) * discount)
+                    discount_price = int(float(sale_price) * discount)
                 else: # 折扣金額
-                    discount_price = int(float(price) - discount)
-                discount_products.append({"sku":tree.item(product, "values")[0], "name": tree.item(product, "values")[1], "price": discount_price, "stock_quantity": tree.item(product, "values")[3]})
+                    discount_price = int(float(sale_price) - discount)
+                discount_products.append({"sku":tree.item(product, "values")[0], "name": tree.item(product, "values")[1], "sale_price": discount_price, "stock_quantity": tree.item(product, "values")[3]})
                 # 從樹狀視圖中移除折扣商品
                 tree.delete(product)
             
             # 更新樹狀視圖以顯示折扣後的商品
             for index, product in enumerate(discount_products):
-                values = (product['name'], f"${product['price']}", "")
+                values = (product['name'], f"${product['sale_price']}", "")
                 tag = 'odd' if index % 2 else 'even'
                 tree.insert('', 'end', values=values, tags=(tag,))
             # 更新資料庫中的折扣商品
             for product in discount_products:
                 db.product.update_one(
                     {"name": product['name']},
-                    {"$set": {"price": product['price']}}
+                    {"$set": {"sale_price": product['sale_price']}}
                 )
             popup.destroy()
             messagebox.showinfo("成功", "已成功應用折扣")
@@ -277,12 +277,13 @@ def update_products():
         res = wcapi.get("products", params={"sku": product["sku"]})
         if res.status_code == 200:
             data = res.json()
-            print("data:",data)
-            if data!=[] and "price" in data[0]:
-                if data[0]["price"] != product["price"]:
-                    wcapi.put("products/{}".format(data[0]["id"]), data={"price": product["price"]})
+            print(data)
+            if data!=[] and "sale_price" in data[0]:
+                if data[0]["sale_price"] != product["sale_price"]:
+                    wcapi.put("products/{}".format(data[0]["id"]), data={"sale_price": product["sale_price"]})
             else:
-                wcapi.post("products", {"sku": product["sku"], "name": product["name"], "price": product["price"], "stock_quantity": product["stock_quantity"]})
+                res = wcapi.post("products", {"sku": product["sku"], "name": product["name"], "sale_price": product["sale_price"], "stock_quantity": product["stock_quantity"]})
+                print(f"更新成功: {res.status_code} - {res.text}: {product['name']}")
         else:
             print(f"更新失敗: {res.status_code} - {res.text}")
 
@@ -297,16 +298,23 @@ def import_products():
         filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
     )
     uploaded_products = []
+    # 謮取CSV檔案
     if file_path:
         with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
-            for product in tree.get_children():
-                tree.delete(product)
-            for index, row in enumerate(reader):
-                tags = 'even' if index % 2 == 0 else 'odd'
-                tree.insert("", "end", values=(row["SKU"], row["Name"], f"${row["Sale price"]}", row["Stock"]), tags=(tags,))
-                uploaded_products.append({"sku": row["SKU"], "name": row["Name"], "price": row["Sale price"], "stock_quantity": row["Stock"]})
-    db.product.insert_many(uploaded_products)
+            for row in reader:        
+                uploaded_products.append({"sku": row["SKU"], "name": row["Name"], "sale_price": row["Sale price"], "stock_quantity": row["Stock"]})
+    # 刪除TreeView中的所有商品列表
+    for product in tree.get_children():
+        tree.delete(product)
+    # 更新資料庫中的商品
+    for product in uploaded_products:
+        if not db.product.find_one({"sku": product["sku"]}):
+            db.product.insert_one(product)
+    # 更新TreeView中的商品列表
+    for index, product in enumerate(db.product.find()):
+        tags = 'even' if index % 2 == 0 else 'odd'
+        tree.insert("", "end", values=(product["sku"], product["name"], f"${product['sale_price']}", product["stock_quantity"]), tags=(tags,))
 
 import_button = tk.Button(button_frame, text="匯入", width=8, command=import_products)
 import_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
