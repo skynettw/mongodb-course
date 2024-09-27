@@ -280,7 +280,7 @@ def update_products():
             print("data:",data)
             if data!=[] and "price" in data[0]:
                 if data[0]["price"] != product["price"]:
-                    wcapi.put("products", {"id": data[0]["id"]}, {"price": product["price"]})
+                    wcapi.put("products/{}".format(data[0]["id"]), data={"price": product["price"]})
             else:
                 wcapi.post("products", {"sku": product["sku"], "name": product["name"], "price": product["price"], "stock_quantity": product["stock_quantity"]})
         else:
