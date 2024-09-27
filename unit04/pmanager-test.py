@@ -277,9 +277,10 @@ def update_products():
         res = wcapi.get("products", params={"sku": product["sku"]})
         if res.status_code == 200:
             data = res.json()
-            if data:
-                if data["price"] != product["price"]:
-                    wcapi.put("products", {"id": data["id"]}, {"price": product["price"]})
+            print("data:",data)
+            if data!=[] and "price" in data[0]:
+                if data[0]["price"] != product["price"]:
+                    wcapi.put("products", {"id": data[0]["id"]}, {"price": product["price"]})
             else:
                 wcapi.post("products", {"sku": product["sku"], "name": product["name"], "price": product["price"], "stock_quantity": product["stock_quantity"]})
         else:
