@@ -24,7 +24,7 @@ wcapi2 = API(
     version="wc/v3", 
     timeout=120
 )
-wcapi = wcapi2
+wcapi = wcapi1
 
 # Create the main application window
 root = tk.Tk()
@@ -88,12 +88,14 @@ def load_website():
     website_display.config(text=f"網站：{selected_website}")
 
 def load_database():
-    global db, product_list, product_category
+    global db, product_list, product_category, wcapi
     selected_website = website_label.get()
     if selected_website == "WP1":
         db = db_wp1
+        wcapi = wcapi1
     elif selected_website == "WP2":
         db = db_wp2
+        wcapi = wcapi2
 
     # 取得所有商品
     product_list = db.product.find()
@@ -235,7 +237,7 @@ def discount_products():
             
             # 更新樹狀視圖以顯示折扣後的商品
             for index, product in enumerate(discount_products):
-                values = (product['name'], f"${product['sale_price']}", "")
+                values = (product['sku'], product['name'], f"${product['sale_price']}", product['stock_quantity'])
                 tag = 'odd' if index % 2 else 'even'
                 tree.insert('', 'end', values=values, tags=(tag,))
             # 更新資料庫中的折扣商品
@@ -274,18 +276,16 @@ delete_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 def update_products():
     global db, wcapi
     for product in db.product.find():
-        res = wcapi.get("products", params={"sku": product["sku"]})
-        if res.status_code == 200:
-            data = res.json()
-            print(data)
-            if data!=[] and "sale_price" in data[0]:
-                if data[0]["sale_price"] != product["sale_price"]:
-                    wcapi.put("products/{}".format(data[0]["id"]), data={"sale_price": product["sale_price"]})
-            else:
-                res = wcapi.post("products", {"sku": product["sku"], "name": product["name"], "sale_price": product["sale_price"], "stock_quantity": product["stock_quantity"]})
-                print(f"更新成功: {res.status_code} - {res.text}: {product['name']}")
+        print(product["sku"])
+        data = wcapi.get("products", params={"sku": product["sku"]}).json()
+        if len(data)>=1:
+            data = data[0]
+            if data["sale_price"] != product["sale_price"]:
+                res = wcapi.put("products/{}".format(data["id"]), data={"sale_price": str(product["sale_price"])})
+                print(f"更新成功: {data['sku']}: {data['sale_price']} -> {product['sale_price']}")
         else:
-            print(f"更新失敗: {res.status_code} - {res.text}")
+            res = wcapi.post("products", {"sku": product["sku"], "name": product["name"], "sale_price": str(product["sale_price"]), "stock_quantity": str(product["stock_quantity"])})
+            print(f"新增成功: {product['sku']}: {product['name']}")
 
         
 update_button = tk.Button(button_frame, text="更新", width=8, command=update_products)
