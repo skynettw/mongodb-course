@@ -1,0 +1,11 @@
+ID,Type,SKU,Name,Published,Is featured?,Visibility in catalog,Short description,Description,Regular price,Sale price,Stock
+1,simple,ELEC001,Arduino Uno R3,1,1,visible,開發板適合初學者使用,這是一款流行的開發板，用於學習電子技術和創客項目。,25.0,20.0,50
+2,simple,ELEC002,Raspberry Pi 4,1,0,visible,高效能迷你電腦,Raspberry Pi 4 是一台可用於多種電子項目的迷你電腦。,75.0,65.0,30
+3,simple,ELEC003,ESP32 開發板,1,0,visible,支援WiFi和藍牙,ESP32 是功能強大的開發板，適合各類無線網路項目。,12.0,10.0,100
+4,simple,ELEC004,Breadboard 400孔,1,0,visible,適合原型開發,這款 400 孔的麵包板適合創客進行電路原型設計。,3.0,2.5,200
+5,simple,ELEC005,杜邦線 40根,1,0,visible,適用於跳線連接,40根杜邦線適合於電子項目中的跳線連接使用。,5.0,4.5,150
+6,simple,ELEC006,DHT11 溫濕度感測器,1,0,visible,用於環境監測,DHT11 溫濕度感測器用於環境溫濕度的測量。,7.0,6.0,80
+7,simple,ELEC007,光敏電阻模組,1,0,visible,用於光線感測,光敏電阻模組可用於光強度的測量。,4.0,3.5,120
+8,simple,ELEC008,HC-SR04 超聲波模組,1,0,visible,距離感測模組,HC-SR04 超聲波模組可用於測量距離，常見於機器人項目。,6.0,5.5,90
+9,simple,ELEC009,Nema 17 步進電機,1,0,visible,高精度步進電機,Nema 17 步進電機常用於 3D 列印機和 CNC 機器。,15.0,13.0,60
+10,simple,ELEC010,LCD 1602 顯示屏,1,0,visible,文字顯示模組,LCD 1602 顯示屏適合用於各類項目中的文字輸出。,10.0,8.5,70
