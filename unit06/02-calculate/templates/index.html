@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面積單位換算</title>
+</head>
+<body>
+    <h1>面積單位換算</h1>
+    
+    <form method="POST">
+        <label for="value">輸入數值:</label>
+        <input type="number" step="any" id="value" name="value" required>
+        
+        <br><br>
+
+        <label for="conversion_type">選擇換算類型:</label>
+        <select id="conversion_type" name="conversion_type">
+            <option value="sqm_to_ping">平方公尺轉坪</option>
+            <option value="ping_to_sqm">坪轉平方公尺</option>
+        </select>
+        
+        <br><br>
+
+        <button type="submit">換算</button>
+    </form>
+
+    {% if result %}
+        <h2>結果: {{ result }}</h2>
+    {% endif %}
+</body>
+</html>
