@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坪與平方公尺換算器</title>
+</head>
+<body>
+    <h1>坪與平方公尺換算器</h1>
+    
+    <form method="POST">
+        <label for="conversion_type">選擇換算類型:</label>
+        <select id="conversion_type" name="conversion_type" required>
+            <option value="sqm_to_tsubo">平方公尺轉換為坪</option>
+            <option value="tsubo_to_sqm">坪轉換為平方公尺</option>
+        </select>
+        <br>
+        <label for="value">輸入數值:</label>
+        <input type="text" id="value" name="value" required>
+        <button type="submit">換算</button>
+    </form>
+
+    {% if result %}
+        <p>結果: {{ result }}</p>
+    {% elif error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>
