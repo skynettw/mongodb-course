@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}個人隨身記帳助手{% endblock %}
+
+{% block content %}
+  {% if 'username' in session %}
+    <h1 class="text-center alert alert-primary">{{ session['username'] }} | 個人隨身記帳助手</h1>
+  {% else %}
+    <h1 class="text-center alert alert-primary">個人隨身記帳助手</h1>
+  {% endif %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+      {% if 'username' in session %}
+        <button type="button" class="btn btn-primary btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('add_expense') }}'">新增支出</button>
+        <button type="button" class="btn btn-primary btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('add_income') }}'">新增收入</button>
+        <button type="button" class="btn btn-info btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('reports') }}'">查看報表</button>
+        <button type="button" class="btn btn-success btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('statistics') }}'">統計圖表</button>
+        <button type="button" class="btn btn-secondary btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('edit_categories') }}'">編輯類別</button>
+        <button type="button" class="btn btn-danger btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('logout') }}'">登出</button>
+      {% else %}
+        <button type="button" class="btn btn-primary btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('login') }}'">登入</button>
+        <button type="button" class="btn btn-secondary btn-lg w-100 mb-3" onclick="window.location.href='{{ url_for('register') }}'">註冊</button>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

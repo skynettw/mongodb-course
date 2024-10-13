@@ -1,6 +1,29 @@
+1. 修改架構，加上base.html以及nav.html
+2. 加入以下的提示命令
+請為這個Flask網站加上MongoDB的存取功能，連線網址為："mongodb+srv://admin:mymdb$1234@hopeitdb.iczymzy.mongodb.net/?retryWrites=true&w=majority&appName=hopeitdb"
+
 請加入使用者註冊以及登入和登出的功能。使用者要記錄在MongoDB的finanacedb資料庫中的users collection中，要新增一個註冊以及登入的頁面，使用者的document中要有name, email, password等3個欄位。
 
-使用者完成登入之後，要記錄使用者名稱放在session中儲存起來，並顯示在標題上。此外，登入之後才能看到index頁面中的功能按鈕，未登入時，請在中間顯示登入以及註冊按鈕。註冊、登入兩個選項只有在登入前才看得到。登入之後只能看到登出功能。並請完成登出的功能。還有利用Bootstrap美化註冊及登入的頁面。
+使用者完成登入之後，要記錄使用者名稱放在session中儲存起來，並顯示在標題上。此外，登入之後才能看到index頁面中的功能按鈕，未登入時，請在中間顯示登入以及註冊按鈕。註冊、登入兩個選項只有在登入前才看得到。登入之後只能看到登出功能。並請完成登出的功能。還有利用提供的base.html中的Bootstrap美化註冊及登入的頁面。
 
-你沒有修改到index.html，請進行修改。此外，請利用base.html的功能，把index.html中包含標題、navbar以及相關頁面設定提取出來，讓每一個網頁都可以延伸base.html，使所有網頁具有一致性。
+這是一個個人記帳網站程式，請參考index.html中按鈕的用途，為此網站新增對應的功能。並把所有完成的路由都對應到navbar中的選項以及index.html中的按鈕上。在MongoDB中，類別存放在category collection中，支出放在expense collection，收入放在income collection中。category的document欄位包括user, name及memo，expense以及income的document中的欄位包括user, name, category, amount, memo。
 
+你沒有更新到navbar.html以及為index.html的按鈕加入對應的連結
+
+請加入編輯類別的功能，然後讓新增收入以及新增支出兩個功能可以使用下拉式選單的方式，選擇類別。
+
+請再加上查看報表的功能，進入此功能之後，可以列出所有的支出與收入。
+
+在未登入狀態時，請隱藏navbar的登出選項，以及index.html最下方的登出按鈕。
+
+登入之後，請把使用者的名稱放在標題前面，兩者中間加一個分隔符號。並將標題置中。
+
+請為支出以及收入加上日期欄位，另外，在新增時，日期欄位請以日期選擇器，讓使用者選擇。
+
+請在查看報表中加入年及月的篩選功能，以及每一筆資料的刪除按鈕及功能。
+
+請在index.html的查看報表按鈕底下新增一個統計圖表的按鈕，請加入它的功能。使用matplotlib提供2個圖表。第一個圖表以年為單位，統計每個月份的收支合計之直條圖。如為正值即以綠色條往上畫，如為負值，則以紅色條往下畫。第2個圖表左側為當月份的類別支出圓餅圖，右側為當月份類別收入的圓餅圖。
+
+上方的直條圖請加入年的篩選重繪功能，一開始先以當年度為對象。下方的圓餅圖以加入年月的篩選重繪功能，一開始先以當月份為對象。
+
+請修正程式，使matplotlib之圖表可以順利使用中文字型

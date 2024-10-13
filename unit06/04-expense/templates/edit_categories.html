@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>編輯類別</h1>
+    <form action="{{ url_for('edit_categories') }}" method="post" class="mb-4">
+        <input type="hidden" name="category_id" value="">
+        <div class="mb-3">
+            <label for="name" class="form-label">類別名稱</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="memo" class="form-label">備註</label>
+            <textarea class="form-control" id="memo" name="memo"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">添加新類別</button>
+    </form>
+
+    <h2>現有類別</h2>
+    <ul class="list-group">
+        {% for category in categories %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ category.name }} - {{ category.memo }}</span>
+            <div>
+                <button class="btn btn-sm btn-warning edit-category" data-id="{{ category._id }}" data-name="{{ category.name }}" data-memo="{{ category.memo }}">編輯</button>
+                <a href="{{ url_for('delete_category', category_id=category._id) }}" class="btn btn-sm btn-danger" onclick="return confirm('確定要刪除此類別嗎？')">刪除</a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+document.querySelectorAll('.edit-category').forEach(button => {
+    button.addEventListener('click', function() {
+        const form = document.querySelector('form');
+        form.querySelector('input[name="category_id"]').value = this.dataset.id;
+        form.querySelector('input[name="name"]').value = this.dataset.name;
+        form.querySelector('textarea[name="memo"]').value = this.dataset.memo;
+        form.querySelector('button[type="submit"]').textContent = '更新類別';
+    });
+});
+</script>
+{% endblock %}
