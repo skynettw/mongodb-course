@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}新增支出 - 個人隨身記帳助手{% endblock %}
+{% block content %}
+<h1 class="alert alert-primary">新增支出</h1>
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">支出名稱</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">類別</label>
+                <select class="form-select" id="category" name="category" required>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">金額</label>
+                <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">日期</label>
+                <input type="date" class="form-control" id="date" name="date" required>
+            </div>
+            <div class="mb-3">
+                <label for="memo" class="form-label">備註</label>
+                <textarea class="form-control" id="memo" name="memo" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">新增支出</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('date').valueAsDate = new Date();
+</script>
+{% endblock %}

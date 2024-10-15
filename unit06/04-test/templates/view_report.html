@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}查看報表 - 個人隨身記帳助手{% endblock %}
+{% block content %}
+<h1 class="alert alert-primary">財務報表</h1>
+
+<form method="GET" class="mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="year" class="form-label">年份</label>
+            <select class="form-select" id="year" name="year">
+                <option value="">全部</option>
+                {% for year in years %}
+                    <option value="{{ year }}" {% if year|string == selected_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="month" class="form-label">月份</label>
+            <select class="form-select" id="month" name="month">
+                <option value="">全部</option>
+                {% for month in range(1, 13) %}
+                    <option value="{{ month }}" {% if month|string == selected_month %}selected{% endif %}>{{ month }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">篩選</button>
+        </div>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>支出列表</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>名稱</th>
+                    <th>類別</th>
+                    <th>金額</th>
+                    <th>備註</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ expense.name }}</td>
+                    <td>{{ expense.category }}</td>
+                    <td>{{ expense.amount }}</td>
+                    <td>{{ expense.memo }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete_expense', expense_id=expense._id) }}" onsubmit="return confirm('確定要刪除這筆支出嗎？');">
+                            <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <h2>收入列表</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>名稱</th>
+                    <th>類別</th>
+                    <th>金額</th>
+                    <th>備註</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for income in incomes %}
+                <tr>
+                    <td>{{ income.date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ income.name }}</td>
+                    <td>{{ income.category }}</td>
+                    <td>{{ income.amount }}</td>
+                    <td>{{ income.memo }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete_income', income_id=income._id) }}" onsubmit="return confirm('確定要刪除這筆收入嗎？');">
+                            <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

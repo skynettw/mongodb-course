@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}編輯類別 - 個人隨身記帳助手{% endblock %}
+{% block content %}
+<h1 class="alert alert-primary">編輯類別</h1>
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">類別名稱</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="memo" class="form-label">備註</label>
+                <textarea class="form-control" id="memo" name="memo" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">新增類別</button>
+        </form>
+    </div>
+</div>
+<div class="mt-4">
+    <h2>現有類別</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>名稱</th>
+                <th>備註</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.name }}</td>
+                <td>{{ category.memo }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('delete_category', category_id=category._id) }}" onsubmit="return confirm('確定要刪除這個類別嗎？');">
+                        <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}統計圖表 - 個人隨身記帳助手{% endblock %}
+{% block content %}
+<h1 class="alert alert-primary">統計圖表</h1>
+
+<div class="mb-3">
+    <label for="year-select" class="form-label">選擇年份：</label>
+    <select id="year-select" class="form-select">
+        {% for year in years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div id="yearly-monthly-chart" style="width:100%;height:500px;"></div>
+
+<div class="mb-3 mt-4">
+    <label for="year-month-select" class="form-label">選擇年月：</label>
+    <input type="month" id="year-month-select" class="form-control" value="{{ selected_year_month }}">
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div id="monthly-expense-chart" style="width:100%;height:400px;"></div>
+    </div>
+    <div class="col-md-6">
+        <div id="monthly-income-chart" style="width:100%;height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var graph1 = {{ graph1_json | safe }};
+    var graph2 = {{ graph2_json | safe }};
+    var graph3 = {{ graph3_json | safe }};
+
+    Plotly.newPlot('yearly-monthly-chart', graph1.data, graph1.layout);
+    Plotly.newPlot('monthly-expense-chart', graph2.data, graph2.layout);
+    Plotly.newPlot('monthly-income-chart', graph3.data, graph3.layout);
+
+    document.getElementById('year-select').addEventListener('change', function() {
+        window.location.href = '/statistics?year=' + this.value;
+    });
+
+    document.getElementById('year-month-select').addEventListener('change', function() {
+        window.location.href = '/statistics?year_month=' + this.value;
+    });
+</script>
+{% endblock %}
