@@ -28,7 +28,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # 為 session 設置密鑰
 
 # 連接到MongoDB
-client = MongoClient("mongodb+srv://admin:mymdb$1234@hopeitdb.iczymzy.mongodb.net/?retryWrites=true&w=majority&appName=hopeitdb")
+client = MongoClient("mongodb+srv://<account>:<password>@hopeitdb.iczymzy.mongodb.net/?retryWrites=true&w=majority&appName=hopeitdb")
 db = client.get_database("financedb")  # 假設我們使用名為"hopeitdb"的數據庫
 
 @app.route('/')

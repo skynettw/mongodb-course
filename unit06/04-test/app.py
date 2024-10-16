@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # MongoDB連接
-conn = "mongodb+srv://admin:mymdb$1234@hopeitdb.iczymzy.mongodb.net/?retryWrites=true&w=majority&appName=hopeitdb"
+conn = "mongodb+srv://<account>:<password>@hopeitdb.iczymzy.mongodb.net/?retryWrites=true&w=majority&appName=hopeitdb"
 client = MongoClient(conn)
 db = client.finanacedb
 users = db.users
