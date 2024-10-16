@@ -6,6 +6,7 @@
 
 ### 影音課程共計14小時16分
 ### 可以學習到以下的技術，並完成多個有趣的應用程式
+### 目前已上線課程可以學習到的技術如下
 * Python基本語法
 * Jupyter Notebook的使用技巧
 * MongoDB基礎與應用
@@ -15,7 +16,16 @@
 * 使用Visual Studio Code + Codeium AI助手
 * 學會透過ChatGPT及Claude互動式建立程式
 * 使用Cursor建立以Tkinter為基礎的Python視窗程式
-* 使用Cursor建立以Flask+Bootstrap+MongoDB為基礎的網頁應用程式
+* 使用Cursor建立以Flask+Bootstrap+MongoDB+Plotly為基礎的網頁應用程式
 * CSV/JSON檔案與開放式資料的活用
 * 基礎網頁擷取與Scrapy大量爬取資料技巧
 * 到Vercel免費部署你的Flask-based Web APP
+
+### 200% 課程解鎖內容(目前未上線)，期待學員們的支持，達標之後，免費增加
+* Python程式語言語法與設計技巧
+* Python+Flask+MongoDB語法強化課程
+
+### 300% 課程解鎖內容(目前未上線)，期待學員們的支持，達標之後，免費增加
+#### 競品分析程式實作
+* 如何爬取競品資料
+* 活用Pandas/Matplotlib，透過圖表分析資料
